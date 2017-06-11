@@ -1,0 +1,388 @@
+- hosts: win2012
+  
+
+  vars:
+    ansible_site_path: "c:\\inetpub\\wwwroot\\ansibletest"
+    staging_path: "c:\\deploy"
+    ansible_test_staging_path: "{{ staging_path }}\\ansible-test-site-{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+
+    sharepoint_diagnostic_level_debug: 0
+    
+    sharepoint_common:
+      product_key:  'NQGJR-63HC8-XCRQH-MYVCH-3J3QR'
+      
+      farm_account:
+        username: '{{ account_farm_username }}'
+        password: '{{ account_farm_password }}'
+        
+      web_account:
+        Domain:   '{{ account_web_domain | default(inventory_hostname | upper ) }}'
+        username: '{{ account_web_username }}'
+        password: '{{ account_web_password }}'
+        
+    
+    sharepoint_installer:
+      prerequisite_installer_path:  'E:/Prerequisiteinstaller.exe'
+      prerequisite_files_path:      'C:\SharePointInstall\SharePoint_Prerequisites\PrerequisiteInstaller'
+      binaries_path:                'E:\'
+      
+      account:
+        username: '{{ account_installer_username }}'
+        password: '{{ account_installer_password }}'
+      
+  tasks:
+
+#xSPInstallPrereqs InstallPrerequisites
+#{
+#InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
+#OnlineMode = $true
+#SQLNCli = "C:\SPInstall\prerequisiteinstallerfiles\sqlncli.msi"
+#PowerShell = "C:\SPInstall\prerequisiteinstallerfiles\Windows6.1-KB2506143-x64.msu"
+#NETFX = "C:\SPInstall\prerequisiteinstallerfiles\dotNetFx45_Full_setup.exe"
+#IDFX = "C:\SPInstall\prerequisiteinstallerfiles\Windows6.1-KB974405-x64.msu"
+#Sync = "C:\SPInstall\prerequisiteinstallerfiles\Synchronization.msi"
+#AppFabric = "C:\SPInstall\prerequisiteinstallerfiles\WindowsServerAppFabricSetup_x64.exe"
+#IDFX11 = "C:\SPInstall\prerequisiteinstallerfiles\MicrosoftIdentityExtensions-64.msi"
+#MSIPCClient = "C:\SPInstall\prerequisiteinstallerfiles\setup_msipc_x64.msi"
+#WCFDataServices = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices.exe"
+#KB2671763 = "C:\SPInstall\prerequisiteinstallerfiles\AppFabric1.1-RTM-KB2671763-x64-ENU.exe"
+#WCFDataServices56 = "C:\SPInstall\prerequisiteinstallerfiles\WcfDataServices56.exe"
+#Ensure = "Present"
+#}  
+#   - name: "win lcm configuration "       
+#     win_lcm5:
+#       refresh_mode: 'Push'
+#       
+#   - name: "win lcm configuration disabled "       
+#     win_lcm5:
+#       refresh_mode: 'Disabled'
+#       
+   - name: Install Sharepoint Prerequisites
+     win_spinstallprereqs:
+       InstallerPath:       '{{ sharepoint_installer.prerequisite_installer_path }}'
+       OnlineMode: false
+       SQLNCli:             '{{ sharepoint_installer.prerequisite_files_path }}\sqlncli-2012.msi'
+       Sync:                '{{ sharepoint_installer.prerequisite_files_path }}\Synchronization.msi'
+       AppFabric:           '{{ sharepoint_installer.prerequisite_files_path }}\WindowsServerAppFabricSetup_x64.exe'
+       IDFX11:              '{{ sharepoint_installer.prerequisite_files_path }}\MicrosoftIdentityExtensions-64.msi'
+       MSIPCClient:         '{{ sharepoint_installer.prerequisite_files_path }}\setup_msipc_x64.msi'
+       KB3092423:           '{{ sharepoint_installer.prerequisite_files_path }}\AppFabric-KB3092423-x64-ENU.exe'
+       WCFDataServices56:   '{{ sharepoint_installer.prerequisite_files_path }}\WcfDataServices56.exe'
+       DotNetFx:            '{{ sharepoint_installer.prerequisite_files_path }}\NDP46-KB3045557-x86-x64-AllOS-ENU.exe'
+       MSVCRT11:            '{{ sharepoint_installer.prerequisite_files_path }}\vc_redist.x64.exe'
+       MSVCRT14:            '{{ sharepoint_installer.prerequisite_files_path }}\vcredist_x64.exe'
+       ODBC:                '{{ sharepoint_installer.prerequisite_files_path }}\msodbcsql_11.msi'
+       #Don't support Uninstall !!
+       Ensure:              'Present' 
+     register: prerequisites_status
+     tags:
+     - spinstallprereqs
+       
+   - name: Display prerequisites_status
+     debug: var=prerequisites_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spinstallprereqs
+
+#xSPInstall InstallBinaries
+#{
+#BinaryDir = "C:\SPInstall"
+#ProductKey = $ProductKey
+#Ensure = "Present"
+#DependsOn = "[xSPInstallPrereqs]InstallPrerequisites"
+#}
+    
+   - name: Install Sharepoint Binaries
+     win_spinstall:
+       BinaryDir:   '{{ sharepoint_installer.binaries_path }}'
+       ProductKey:  '{{ sharepoint_common.product_key }}'
+       Ensure:      'Present' 
+     register: spinstall_status
+     tags:
+     - spinstall
+     
+   - name: Display spinstall_status
+     debug: var=spinstall_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spinstall
+
+
+#**********************************************************
+# IIS clean up
+#
+# This section removes all default sites and application
+# pools from IIS as they are not required
+#**********************************************************
+#xWebAppPool RemoveDotNet2Pool { Name = ".NET v2.0"; Ensure = "Absent"; DependsOn = "[xSPInstallPrereqs]InstallPrerequisites" }
+#xWebAppPool RemoveDotNet2ClassicPool { Name = ".NET v2.0 Classic"; Ensure = "Absent"; DependsOn = "[xSPInstallPrereqs]InstallPrerequisites" }
+#xWebAppPool RemoveDotNet45Pool { Name = ".NET v4.5"; Ensure = "Absent"; DependsOn = "[xSPInstallPrereqs]InstallPrerequisites"; }
+#xWebAppPool RemoveDotNet45ClassicPool { Name = ".NET v4.5 Classic"; Ensure = "Absent"; DependsOn = "[xSPInstallPrereqs]InstallPrerequisites"; }
+#xWebAppPool RemoveClassicDotNetPool { Name = "Classic .NET AppPool"; Ensure = "Absent"; DependsOn = "[xSPInstallPrereqs]InstallPrerequisites" }
+#xWebAppPool RemoveDefaultAppPool { Name = "DefaultAppPool"; Ensure = "Absent"; DependsOn = "[xSPInstallPrereqs]InstallPrerequisites" }
+#xWebSite RemoveDefaultWebSite { Name = "Default Web Site"; Ensure = "Absent"; PhysicalPath = "C:\inetpub
+     
+   - name: Remove default web site
+     win_xwebsite:
+       name: "Default Web Site"
+       Ensure: 'Absent'
+     register: spwebsite_status
+     tags:
+     - cleanup
+
+   - name: Display spwebsite_status
+     debug: var=spwebsite_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - cleanup
+
+   - name: Remove default application Pool
+     win_webapppool:
+       name: '{{ item }}'
+       Ensure: 'Absent'
+     with_items:
+       - '.NET v2.0'
+       - '.NET v2.0 Classic'
+       - '.NET v4.5'
+       - 'Classic .NET AppPool'
+       - 'DefaultAppPool'
+     register: webapppool_status
+     tags:
+     - cleanup
+
+   - name: Display webapppool_status
+     debug: var=webapppool_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - cleanup
+
+
+        #**********************************************************
+        # Basic farm configuration
+        #
+        # This section creates the new SharePoint farm object, and
+        # provisions generic services and components used by the
+        # whole farm
+        #**********************************************************
+#        SPFarm CreateSPFarm
+#        {
+#            Ensure                   = "Present"
+#            DatabaseServer           = "sql.contoso.com"
+#            FarmConfigDatabaseName   = "SP_Config"
+#            Passphrase               = $Passphrase
+#            FarmAccount              = $FarmAccount
+#            PsDscRunAsCredential     = $SPSetupAccount
+#            AdminContentDatabaseName = "SP_AdminContent"
+#            RunCentralAdmin          = $true
+#            DependsOn                = "[SPInstall]InstallSharePoint"
+#        }
+
+   - name: Create Basic SP Farm
+     win_spfarm:
+       DatabaseServer: 'SRV1\MSSQL'
+       Passphrase_username: 'fakeuser'
+       Passphrase_password: 'TestSup.12'
+       FarmAccount_username: '{{ sharepoint_common.farm_account.username }}'
+       FarmAccount_password: '{{ sharepoint_common.farm_account.password }}'
+       PsDscRunAsCredential_username: '{{ sharepoint_installer.account.username }}'
+       PsDscRunAsCredential_password: '{{ sharepoint_installer.account.password }}'
+       AdminContentDatabaseName: 'SP_AdminContent'
+       FarmConfigDatabaseName: 'SP_Config'
+       RunCentralAdmin: true
+       Ensure: 'Present'
+     register: spfarm_status
+     tags:
+     - spfarm
+
+   - name: Display spfarm_status
+     debug: var=spfarm_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spfarm
+
+     
+#        SPManagedAccount ServicePoolManagedAccount
+#        {
+#            AccountName          = $ServicePoolManagedAccount.UserName
+#            Account              = $ServicePoolManagedAccount
+#            PsDscRunAsCredential = $SPSetupAccount
+#            DependsOn            = "[SPFarm]CreateSPFarm"
+#        }
+#        SPManagedAccount WebPoolManagedAccount
+#        {
+#            AccountName          = $WebPoolManagedAccount.UserName
+#            Account              = $WebPoolManagedAccount
+#            PsDscRunAsCredential = $SPSetupAccount
+#            DependsOn            = "[SPFarm]CreateSPFarm"
+#        }     
+#
+
+#User UserExample
+#{
+#    Ensure = "Present"  # To ensure the user account does not exist, set Ensure to "Absent"
+#    UserName = "SomeName"
+#    Password = $passwordCred # This needs to be a credential object
+#    DependsOn = "[Group]GroupExample" # Configures GroupExample first
+#}
+
+   - name: Create new User
+     win_user:
+       UserName:            '{{ sharepoint_common.web_account.username }}'
+       Password_username:   '{{ sharepoint_common.web_account.Domain }}\{{ sharepoint_common.web_account.username }}'
+       Password_password:   '{{ sharepoint_common.web_account.password }}'
+       Ensure: 'Present'
+     register: user_status
+     tags:
+     - user
+     
+     
+   - name: Display user_status
+     debug: var=user_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - user
+       
+
+   - name: Create SP Managed Accounts
+     win_spmanagedaccount:
+       AccountName:                     '{{ sharepoint_common.web_account.username }}'  
+       Account_username:                '{{ sharepoint_common.web_account.Domain }}\{{ sharepoint_common.web_account.username }}'
+       Account_password:                '{{ sharepoint_common.web_account.password }}'
+       PsDscRunAsCredential_username:   '{{ sharepoint_installer.account.username }}'
+       PsDscRunAsCredential_password:   '{{ sharepoint_installer.account.password }}'
+     register: spmanagedaccount_status
+     tags:
+     - spmanagedaccount
+     
+     
+   - name: Display spmanagedaccount_status
+     debug: var=spmanagedaccount_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spmanagedaccount
+
+
+#        SPDiagnosticLoggingSettings ApplyDiagnosticLogSettings
+#        {
+#            PsDscRunAsCredential                        = $SPSetupAccount
+#            LogPath                                     = "C:\ULS"
+#            LogSpaceInGB                                = 5
+#            AppAnalyticsAutomaticUploadEnabled          = $false
+#            CustomerExperienceImprovementProgramEnabled = $true
+#            DaysToKeepLogs                              = 7
+#            DownloadErrorReportingUpdatesEnabled        = $false
+#            ErrorReportingAutomaticUploadEnabled        = $false
+#            ErrorReportingEnabled                       = $false
+#            EventLogFloodProtectionEnabled              = $true
+#            EventLogFloodProtectionNotifyInterval       = 5
+#            EventLogFloodProtectionQuietPeriod          = 2
+#            EventLogFloodProtectionThreshold            = 5
+#            EventLogFloodProtectionTriggerPeriod        = 2
+#            LogCutInterval                              = 15
+#            LogMaxDiskSpaceUsageEnabled                 = $true
+#            ScriptErrorReportingDelay                   = 30
+#            ScriptErrorReportingEnabled                 = $true
+#            ScriptErrorReportingRequireAuth             = $true
+#            DependsOn                                   = "[SPFarm]CreateSPFarm"
+#        }
+
+   - name: Apply Diagnostic Log Settings 
+     win_spdiagnosticloggingsettings:
+       PsDscRunAsCredential_username: '{{ sharepoint_installer.account.username }}'
+       PsDscRunAsCredential_password: '{{ sharepoint_installer.account.password }}'
+       LogPath:                                     'C:\ULS'
+       LogSpaceInGB:                                5
+       AppAnalyticsAutomaticUploadEnabled:          false
+       CustomerExperienceImprovementProgramEnabled: true
+       DaysToKeepLogs:                              7
+       DownloadErrorReportingUpdatesEnabled:        false
+       ErrorReportingAutomaticUploadEnabled:        false
+       ErrorReportingEnabled:                       false
+       EventLogFloodProtectionEnabled:              true
+       EventLogFloodProtectionNotifyInterval:       5
+       EventLogFloodProtectionQuietPeriod:          2
+       EventLogFloodProtectionThreshold:            5
+       EventLogFloodProtectionTriggerPeriod:        2
+       LogCutInterval:                              15
+       LogMaxDiskSpaceUsageEnabled:                 true
+       ScriptErrorReportingDelay:                   30
+       ScriptErrorReportingEnabled:                 true
+       ScriptErrorReportingRequireAuth:             true       
+     register: spdiagnosticloggingsettings_status
+     tags:
+     - spdiagnosticloggingsettings
+     
+     
+   - name: Display spdiagnosticloggingsettings_status
+     debug: var=spdiagnosticloggingsettings_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spdiagnosticloggingsettings
+     
+
+     
+#  - name: create new website's directory
+#    win_file: path={{ ansible_site_path }} state=directory
+#
+#  - name: Install IIS Web-Server with sub features and management tools
+#    win_feature:
+#      name: Web-Server
+#      state: present
+#      restart: True
+#      include_sub_features: True
+#      include_management_tools: True
+#      
+#  - name: Remove default web site
+#    win_xwebsite:
+#      name: "Default Web Site"
+#      Ensure: 'Absent'
+#      
+#  - name: create new website
+#    win_xwebsite:
+#      name: "Ansible Test Site"
+#      state: Stopped
+#      PhysicalPath: "{{ ansible_site_path }}"
+#      BindingInfo: "{MSFT_xWebBindingInformation}
+#                    {
+#                      Protocol  = http,
+#                      Port      = 80,
+#                      IPAddress = *,
+#                      HostName = test4
+#                    },
+#                    {MSFT_xWebBindingInformation}
+#                    {
+#                      Protocol  = https,
+#                      IPAddress = *,
+#                      HostName = test4ssl,
+#                      CertificateThumbprint=FCB7FF5B81680ABFA3F273A7855113CB0211641D,
+#                      CertificateStoreName=My
+#                    }"
+#      AutoInstallModule: true
+#      AutoConfigureLcm: true
+#
+#  - name: create new website2
+#    win_xwebsite:
+#      name: "Ansible Test Site2"
+#      state: Started
+#      PhysicalPath: "{{ ansible_site_path }}"
+#      BindingInfo: "{MSFT_xWebBindingInformation}
+#                    {
+#                      Protocol  = http,
+#                      Port      = 80,
+#                      IPAddress = *,
+#                      HostName = test2
+#                    }"
+#      AutoInstallModule: true
+#      AutoConfigureLcm: true
+#
+#  - name: Stop website
+#    win_xwebsite:
+#      name: "Ansible Test Site"
+#      state: Started
+#
+#  - name: create new website3
+#    win_xwebsite:
+#      name: "Ansible Test Site3"
+#      state: Started
+#      PhysicalPath: "{{ ansible_site_path }}"
+#      BindingInfo: "{MSFT_xWebBindingInformation}
+#                    {
+#                      Protocol  = https,
+#                      IPAddress = *,
+#                      CertificateThumbprint=E837756CA6FA2F17016CB95B738222784E012DFB,
+#                      CertificateStoreName=WebHosting
+#                    }"
+#      
+      

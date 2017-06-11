@@ -1,0 +1,1 @@
+Get-DscResource -Module SharepointDSC | ForEach-Object {Invoke-AnsibleWinModuleGen -DscResourceName $_.Name -DscModuleName SharepointDSC -TargetPath D:\devel\ansible\ansible_sharepoint\modules -TargetModuleName $("win_$($_.Name.ToLower())")}
