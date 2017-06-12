@@ -20,7 +20,14 @@
         username: '{{ account_web_username }}'
         password: '{{ account_web_password }}'
         
-    
+      service_account:
+        Domain:   '{{ account_service_domain | default(inventory_hostname | upper ) }}'
+        username: '{{ account_service_username }}'
+        password: '{{ account_service_password }}'
+
+      database: 'SRV4\MSSQL'
+          
+        
     sharepoint_installer:
       prerequisite_installer_path:  'E:/Prerequisiteinstaller.exe'
       prerequisite_files_path:      'C:\SharePointInstall\SharePoint_Prerequisites\PrerequisiteInstaller'
@@ -175,7 +182,7 @@
 
    - name: Create Basic SP Farm
      win_spfarm:
-       DatabaseServer: 'SRV1\MSSQL'
+       DatabaseServer: '{{ sharepoint_common.database }}'
        Passphrase_username: 'fakeuser'
        Passphrase_password: 'TestSup.12'
        FarmAccount_username: '{{ sharepoint_common.farm_account.username }}'
@@ -222,10 +229,13 @@
 
    - name: Create new User
      win_user:
-       UserName:            '{{ sharepoint_common.web_account.username }}'
-       Password_username:   '{{ sharepoint_common.web_account.Domain }}\{{ sharepoint_common.web_account.username }}'
-       Password_password:   '{{ sharepoint_common.web_account.password }}'
+       UserName:            '{{ item.username }}'
+       Password_username:   '{{ item.Domain }}\{{ item.username }}'
+       Password_password:   '{{ item.password }}'
        Ensure: 'Present'
+     with_items:
+     - '{{ sharepoint_common.service_account }}'
+     - '{{ sharepoint_common.web_account }}'
      register: user_status
      tags:
      - user
@@ -239,11 +249,14 @@
 
    - name: Create SP Managed Accounts
      win_spmanagedaccount:
-       AccountName:                     '{{ sharepoint_common.web_account.username }}'  
-       Account_username:                '{{ sharepoint_common.web_account.Domain }}\{{ sharepoint_common.web_account.username }}'
-       Account_password:                '{{ sharepoint_common.web_account.password }}'
+       AccountName:                     '{{ item.username }}'  
+       Account_username:                '{{ item.Domain }}\{{ item.username }}'
+       Account_password:                '{{ item.password }}'
        PsDscRunAsCredential_username:   '{{ sharepoint_installer.account.username }}'
        PsDscRunAsCredential_password:   '{{ sharepoint_installer.account.password }}'
+     with_items:
+     - '{{ sharepoint_common.service_account }}'
+     - '{{ sharepoint_common.web_account }}'
      register: spmanagedaccount_status
      tags:
      - spmanagedaccount
@@ -313,6 +326,95 @@
      
 
      
+#        SPUsageApplication UsageApplication 
+#        {
+#            Name                  = "Usage Service Application"
+#            DatabaseName          = "SP_Usage"
+#            UsageLogCutTime       = 5
+#            UsageLogLocation      = "C:\UsageLogs"
+#            UsageLogMaxFileSizeKB = 1024
+#            PsDscRunAsCredential  = $SPSetupAccount
+#            DependsOn             = "[SPFarm]CreateSPFarm"
+#        }
+     
+ 
+   - name: Configure Usage application
+     win_spusageapplication:
+       Name:                          'Usage Service Application'
+       DatabaseName:                  'SP_Usage'
+       UsageLogCutTime:               5
+       UsageLogLocation:              'C:\UsageLogs'
+       UsageLogMaxFileSizeKB:         1024
+       PsDscRunAsCredential_username: '{{ sharepoint_installer.account.username }}'
+       PsDscRunAsCredential_password: '{{ sharepoint_installer.account.password }}'
+     register: spusageapplication_status
+     tags:
+     - spusageapplication
+     
+     
+   - name: Display spusageapplication_status
+     debug: var=spusageapplication_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spusageapplication
+       
+
+#        SPStateServiceApp StateServiceApp
+#        {
+#            Name                 = "State Service Application"
+#            DatabaseName         = "SP_State"
+#            PsDscRunAsCredential = $SPSetupAccount
+#            DependsOn            = "[SPFarm]CreateSPFarm"
+#        }
+
+   - name: Configure State Service  Application
+     win_spstateserviceapp:
+       Name:                            'State Service Application'
+       DatabaseName:                    'SP_State'
+       PsDscRunAsCredential_username:   '{{ sharepoint_installer.account.username }}'
+       PsDscRunAsCredential_password:   '{{ sharepoint_installer.account.password }}'
+     register: spstateserviceapp_status
+     tags:
+     - spstateserviceapp
+     
+     
+   - name: Display spstateserviceapp_status
+     debug: var=spstateserviceapp_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spstateserviceapp
+     
+
+#        SPDistributedCacheService EnableDistributedCache
+#        {
+#            Name                 = "AppFabricCachingService"
+#            Ensure               = "Present"
+#            CacheSizeInMB        = 1024
+#            ServiceAccount       = $ServicePoolManagedAccount.UserName
+#            PsDscRunAsCredential = $SPSetupAccount
+#            CreateFirewallRules  = $true
+#            DependsOn            = @('[SPFarm]CreateSPFarm','[SPManagedAccount]ServicePoolManagedAccount')
+#        }
+     
+   - name: Enable distributed cache
+     win_spdistributedcacheservice:
+       Name:                            'AppFabricCachingService'
+       Ensure:                          'Present'
+       CacheSizeInMB:                   1024
+       ServiceAccount:                  '{{ sharepoint_common.service_account.username }}'
+       CreateFirewallRules:             true
+       PsDscRunAsCredential_username:   '{{ sharepoint_installer.account.username }}'
+       PsDscRunAsCredential_password:   '{{ sharepoint_installer.account.password }}'
+     register: spdistributedcacheservice_status
+     tags:
+     - spdistributedcacheservice
+     
+     
+   - name: Display spdistributedcacheservice_status
+     debug: var=spdistributedcacheservice_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spdistributedcacheservice
+
+     
+       
 #  - name: create new website's directory
 #    win_file: path={{ ansible_site_path }} state=directory
 #

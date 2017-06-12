@@ -1,1 +1,17 @@
 Get-DscResource -Module SharepointDSC | ForEach-Object {Invoke-AnsibleWinModuleGen -DscResourceName $_.Name -DscModuleName SharepointDSC -TargetPath D:\devel\ansible\ansible_sharepoint\modules -TargetModuleName $("win_$($_.Name.ToLower())")}
+
+
+
+#WMF 5.1
+invoke-webrequest -uri "http://download.microsoft.com/download/6/F/5/6F5FF66C-6775-42B0-86C4-47D41F2DA187/Win8.1AndW2K12R2-KB3191564-x64.msu" -Outfile d:\Win8.1AndW2K12R2-KB3191564-x64.msu
+
+#Sharepoint 2016 Trial
+https://download.microsoft.com/download/0/0/4/004EE264-7043-45BF-99E3-3F74ECAE13E5/officeserver.img
+
+#SQL 2016 SP1
+http://download.microsoft.com/download/8/E/A/8EA11C68-D6CF-4D79-B760-77A7B17BFB94/SQLServer2016-SSEI-Eval.exe
+
+
+winrm set winrm/config/client/auth @{Basic="true"} 
+winrm set winrm/config/service/auth @{Basic="true"} 
+winrm set winrm/config/service @{AllowUnencrypted="true"}
