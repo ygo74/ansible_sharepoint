@@ -42,57 +42,79 @@
       dscResources:
       - SharepointDSC
       - xPendingReboot
+      - xWebAdministration
       
       prerequsistes:
         sql_client_natif_12:
-          uri: 'https://download.microsoft.com/download/F/E/D/FEDB200F-DE2A-46D8-B661-D019DFE9D470/ENU/x64/sqlncli.msi'
-          filename: 'sqlncli-2012.msi'
+          uri:          'https://download.microsoft.com/download/F/E/D/FEDB200F-DE2A-46D8-B661-D019DFE9D470/ENU/x64/sqlncli.msi'
+          filename:     'sqlncli-2012.msi'
+          productid:    '49D665A2-4C2A-476E-9AB8-FCC425F526FC'
+          
         sql_msodbcsql_11:
-          uri: 'https://download.microsoft.com/download/5/7/2/57249A3A-19D6-4901-ACCE-80924ABEB267/ENU/x64/msodbcsql.msi'
-          filename: 'msodbcsql_11.msi'
+          uri:          'https://download.microsoft.com/download/5/7/2/57249A3A-19D6-4901-ACCE-80924ABEB267/ENU/x64/msodbcsql.msi'
+          filename:     'msodbcsql_11.msi'
+          productid:    '4294D9EB-FECF-4E55-8615-1B9EF152EE95'
+          
         sync_framework:
-          uri: 'https://download.microsoft.com/download/E/0/0/E0060D8F-2354-4871-9596-DC78538799CC/Synchronization.msi'
-          filename: 'Synchronization.msi'
+          uri:          'https://download.microsoft.com/download/E/0/0/E0060D8F-2354-4871-9596-DC78538799CC/Synchronization.msi'
+          filename:     'Synchronization.msi'
+          productid:   '8438EC02-B8A9-462D-AC72-1B521349C001'
+          
         AppFabric:
-          uri: 'https://download.microsoft.com/download/A/6/7/A678AB47-496B-4907-B3D4-0A2D280A13C0/WindowsServerAppFabricSetup_x64.exe'
-          filename: 'WindowsServerAppFabricSetup_x64.exe'
+          uri:          'https://download.microsoft.com/download/A/6/7/A678AB47-496B-4907-B3D4-0A2D280A13C0/WindowsServerAppFabricSetup_x64.exe'
+          filename:     'WindowsServerAppFabricSetup_x64.exe'
+          productid:    '96E70525-4CD1-4920-9C0B-91055C79A962'
+          
         windows_identity_foundation:
           uri: 'http://download.microsoft.com/download/D/7/2/D72FD747-69B6-40B7-875B-C2B40A6B2BDD/Windows6.1-KB974405-x64.msu'
           filename: 'Windows6.1-KB974405-x64.msu'
+          
         identity_extensions:
-          uri: 'http://download.microsoft.com/download/0/1/D/01D06854-CA0C-46F1-ADBA-EBF86010DCC6/rtm/MicrosoftIdentityExtensions-64.msi'
-          filename: 'MicrosoftIdentityExtensions-64.msi'
+          uri:          'http://download.microsoft.com/download/0/1/D/01D06854-CA0C-46F1-ADBA-EBF86010DCC6/rtm/MicrosoftIdentityExtensions-64.msi'
+          filename:     'MicrosoftIdentityExtensions-64.msi'
+          productid:    'F99F24BF-0B90-463E-9658-3FD2EFC3C992'
+          
         microsoft_protection_client:
-          uri: 'https://download.microsoft.com/download/3/C/F/3CF781F5-7D29-4035-9265-C34FF2369FA2/setup_msipc_x64.exe'          
-          filename: 'setup_msipc_x64.msi'
+          uri:          'https://download.microsoft.com/download/3/C/F/3CF781F5-7D29-4035-9265-C34FF2369FA2/setup_msipc_x64.exe'          
+          filename:     'setup_msipc_x64.exe'
+          productid:    'EF541964-8162-4E20-8943-17FFD1666446'
+          
         dotnet_462:
           uri: 'https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe'
           filename: 'NDP462-KB3151800-x86-x64-AllOS-ENU.exe'
+          
         wcfdataservices_56:
-          uri: 'https://download.microsoft.com/download/1/C/A/1CAA41C7-88B9-42D6-9E11-3C655656DAB1/WcfDataServices.exe'
-          filename: 'WcfDataServices56.exe'
+          uri:          'https://download.microsoft.com/download/1/C/A/1CAA41C7-88B9-42D6-9E11-3C655656DAB1/WcfDataServices.exe'
+          filename:     'WcfDataServices56.exe'
+          productid:    '46910786-E4AC-41E4-A4A0-C086EA85242D'
+          
         cumulative_update_appfabric:
           uri: 'https://download.microsoft.com/download/F/1/0/F1093AF6-E797-4CA8-A9F6-FC50024B385C/AppFabric-KB3092423-x64-ENU.exe'
           filename: 'AppFabric-KB3092423-x64-ENU.exe'
+          
         redistribuable_cpp_2012:
-          uri: 'https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
-          filename: 'vc_redist_2012_x64.exe'
+          uri:          'https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe'
+          filename:     'vc_redist_2012_x64.exe'
+          productid:    'CF2BEA3C-26EA-32F8-AA9B-331F7E34BA97'
+          
         redistribuable_cpp_2015:
-          uri: 'http://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe'
-          filename: 'vc_redist_2015.x64.exe'
+          uri:          'http://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe'
+          filename:     'vc_redist_2015.x64.exe'
+          productid:    '0D3E9E15-DE7A-300B-96F1-B4AF12B96488'
           
   tasks:
 
+   - name: Ensure Sharepoint folders for this sample
+     win_file:
+       path:    '{{ item }}'
+       state:   'directory'
+     with_items:
+     - '{{ sharepoint_installer.download_packages_path }}'
+     - '{{ sharepoint_installer.prerequisite_files_path }}'
+     tags: always
+     
    - block:
 
-     - name: Ensure Sharepoint folders for this sample
-       win_file:
-         path:    '{{ item }}'
-         state:   'directory'
-       with_items:
-       - '{{ sharepoint_installer.download_packages_path }}'
-       - '{{ sharepoint_installer.prerequisite_files_path }}'
-   
      - name: get powershell version
        raw: 'Invoke-Command -ScriptBlock {$psversiontable.psversion | ConvertTo-Json }'
        register: powershell_version
@@ -140,6 +162,24 @@
      tags:
      - bootstrap
 
+   - block:
+     - name: Install Package before execute sharepoint prerequisites
+       win_package:
+         name:      '{{ item.key }}'
+         path:      '{{ sharepoint_installer.prerequisite_files_path }}\{{ item.value.filename }}'
+         productid: '{{ item.value.productid }}'
+         arguments: '/quiet'
+       with_dict: '{{ sharepoint_installer.prerequsistes }}'
+       when: 'item.value.productid is defined'
+       register: packages_status
+       
+     - name: Display packages_status
+       debug: var=packages_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+       
+     tags:
+       - win_package
+       
+     
 #xSPInstallPrereqs InstallPrerequisites
 #{
 #InstallerPath = "C:\SPInstall\Prerequisiteinstaller.exe"
@@ -162,7 +202,7 @@
 #       refresh_mode: 'Push'
 #       
 
-#   - block:
+   - block:
 #     - name: Verif if sharepoint installer has been already downloaded
 #       win_stat:
 #         path: '{{ sharepoint_installer.download_packages_path }}\Sharepoint2016withsp1.img'
@@ -178,7 +218,7 @@
        win_uri:
          url:     'https://download.microsoft.com/download/0/0/4/004EE264-7043-45BF-99E3-3F74ECAE13E5/officeserver.img'
          dest:    '{{ sharepoint_installer.download_packages_path }}\Sharepoint2016withsp1.img'
-       when: 'file_info is defined and file_info.stat.exist != true'  
+       when: 'file_info is defined and file_info.stat.exists != true'  
          
      - name: Mount the Sharepoint image
        win_disk_image:
@@ -189,6 +229,24 @@
      tags:
      - spinstallprereqs
      - spinstall
+     
+   - name: Test xPendingReboot
+     win_xpendingreboot:
+       name: 'BeforeSoftwareInstall'
+     register: pendingreboot_status
+     tags:
+     - spinstallprereqs
+     
+   - name: Display pendingreboot_status
+     debug: var=pendingreboot_status verbosity='{{ sharepoint_diagnostic_level_debug }}'
+     tags:
+     - spinstallprereqs
+     
+   - name: Reboot server after prerequisite installation if needed
+     win_reboot:
+     when: 'pendingreboot_status.changed'
+     tags:
+     - spinstallprereqs
      
    - name: Install Sharepoint Prerequisites
      win_spinstallprereqs:
@@ -218,7 +276,7 @@
 
    - name: Test xPendingReboot
      win_xpendingreboot:
-       name: 'BeforeSoftwareInstall'
+       name: 'AfterSoftwareInstall'
      register: pendingreboot_status
      tags:
      - spinstallprereqs
@@ -244,7 +302,7 @@
     
    - name: Install Sharepoint Binaries
      win_spinstall:
-       BinaryDir:   '{{ sharepoint_installer.binaries_path }}'
+       BinaryDir:   '{{ disk_image_out.mount_path | default(sharepoint_installer.binaries_path) }}'
        ProductKey:  '{{ sharepoint_common.product_key }}'
        Ensure:      'Present' 
      register: spinstall_status
