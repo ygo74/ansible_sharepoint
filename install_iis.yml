@@ -11,6 +11,8 @@
     sharepoint_common:
       product_key:  'NQGJR-63HC8-XCRQH-MYVCH-3J3QR'
       
+      usagelogs_path: 'c:\UsageLogs '
+      
       farm_account:
         username: '{{ account_farm_username }}'
         password: '{{ account_farm_password }}'
@@ -46,7 +48,8 @@
       
       prerequsistes:
         sql_client_natif_12:
-          uri:          'https://download.microsoft.com/download/F/E/D/FEDB200F-DE2A-46D8-B661-D019DFE9D470/ENU/x64/sqlncli.msi'
+          #uri:          'https://download.microsoft.com/download/F/E/D/FEDB200F-DE2A-46D8-B661-D019DFE9D470/ENU/x64/sqlncli.msi'
+          uri:          'https://download.microsoft.com/download/B/E/D/BED73AAC-3C8A-43F5-AF4F-EB4FEA6C8F3A/1033/amd64/sqlncli.msi'
           filename:     'sqlncli-2012.msi'
           productid:    '49D665A2-4C2A-476E-9AB8-FCC425F526FC'
           
@@ -111,6 +114,7 @@
      with_items:
      - '{{ sharepoint_installer.download_packages_path }}'
      - '{{ sharepoint_installer.prerequisite_files_path }}'
+     - '{{ sharepoint_common.usagelogs_path }}'
      tags: always
      
    - block:
